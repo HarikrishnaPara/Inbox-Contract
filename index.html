@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inbo Contract</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+    <script src="https://smtpjs.com/v3/smtp.js" ></script>
+</head>
+<body>
+	
+	<button onclick="connectMetamask()">CONNECT TO METAMASK</button> <br>
+	<p id="accountArea">Account address will apear here</p>
+	<button onclick="connectContract()">CLICK TO CONNECT WITH CONTRACT</button> <br>
+	<p id="contractArea">Here you can see contract connection status</p>
+	<button onclick="readContract()">EXISTING MESSAGE</button> <br>
+	<p id="dataArea">Existing message appears here</p>
+	
+	<h3>Enter new message in below text box</h3>
+	<div>
+		<input  id="newmsg" placeholder="Enter New Message" ></input>
+	</div>
+    <form  onsubmit="updateContract(); reset(); return false;">
+    	<button type = "submit"  >CLICK TO UPDATE WITH NEW MESSAGE</button> <br>
+		<p id = "dataArea1"></p>
+	</form>
+
+    <script>
+		
+        //1- connect metamask to site
+		let account;
+        const connectMetamask = async () => {
+            if(window.ethereum !== "undefined") {
+				const accounts = await ethereum.request({method: "eth_requestAccounts"});
+                account = accounts[0];
+                document.getElementById("accountArea").innerHTML = account;
+            }
+        }
+
+        //2- Connect to Smart contract
+		const connectContract = async () => {
+            const ABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "newMessage",
+				"type": "string"
+			}
+		],
+		"name": "setMessage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "initialMessage",
+				"type": "string"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "message",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+            const Address = "0xa2900AFf5121d9393e195ADAF4aD1042cD4C7a13";
+            window.web3 = await new Web3(window.ethereum);
+            window.contract = await new window.web3.eth.Contract( ABI, Address); 
+            document.getElementById("contractArea").innerHTML = "connected to smart contract";
+        }
+
+
+        //3-read data from smart contract
+        const readContract = async () => {
+            const data = await window.contract.methods.message().call();
+            document.getElementById("dataArea").textContent = data;
+        }
+
+		//4-update data from smart contract
+		
+		const updateContract = async () => {
+			let newmsg = document.getElementById('newmsg').value;
+            const data1 = await window.contract.methods.setMessage(newmsg).send({from: account});
+		    window.location.reload();
+        }
+
+
+    </script>
+</body>
+</html>
