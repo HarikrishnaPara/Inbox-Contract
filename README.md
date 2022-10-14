@@ -1,0 +1,2 @@
+# Inbox-Contract
+//lottery
